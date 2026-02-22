@@ -121,6 +121,11 @@ grep "noble-server-cloudimg-amd64.img" /tmp/SHA256SUMS | \
 Choose a template VM ID that will not conflict with your managed VMs. Convention: use
 ID `9000` for templates.
 
+> **Clustered Proxmox:** VM IDs are shared cluster-wide. Create the template on **one node only**.
+> OpenTofu will handle cross-node cloning when provisioning VMs on other nodes — Proxmox
+> copies the disk over the network automatically. Running `qm create 9000` on a second node
+> will fail if the cluster already has a VM with that ID.
+
 ```bash
 # Create a new VM (this becomes the template)
 qm create 9000 \
