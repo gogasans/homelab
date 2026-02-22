@@ -53,11 +53,16 @@ entirely via GitOps with FluxCD.
 
 ## Prerequisites
 
-Install all tools at the pinned versions in [.tool-versions](.tool-versions):
+Install all tools at the pinned versions in [.tool-versions](.tool-versions) using [mise](https://mise.jdx.dev):
 
 ```bash
-# Install asdf if not already installed: https://asdf-vm.com/guide/getting-started.html
-asdf install
+# Install mise (macOS)
+brew install mise
+echo 'eval "$(mise activate zsh)"' >> ~/.zshrc
+source ~/.zshrc
+
+# Install all tools at pinned versions (reads .tool-versions automatically)
+mise install
 ```
 
 Verify all tools are installed correctly:

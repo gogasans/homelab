@@ -26,7 +26,19 @@ Each entry follows this structure:
 
 ## Entries
 
-_No entries yet. This section will grow as the project progresses._
+### 2026-02-22 — Use mise instead of asdf for tool version management
+
+**Phase:** Phase 0 / setup
+**What happened:** `asdf` requires manually registering a plugin for each tool before `asdf install`
+can run. With 9 tools, this means 9 separate `asdf plugin add` commands — more friction than needed
+for onboarding.
+**Why it happened:** `asdf`'s plugin model is opt-in per tool; it does not auto-discover tools from
+`.tool-versions`.
+**How it was fixed:** Switched to `mise`, a drop-in replacement that reads the same `.tool-versions`
+format but handles plugin resolution automatically. The entire setup becomes two commands:
+`brew install mise` and `mise install`.
+**What to remember:** `mise` is strictly better for this use case — same `.tool-versions` format,
+no plugin management, faster installs. Prefer `mise` over `asdf` for new projects.
 
 ---
 
