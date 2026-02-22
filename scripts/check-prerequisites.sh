@@ -61,11 +61,8 @@ while IFS=' ' read -r tool version; do
     flux2)
       check_tool "flux" "$version" "flux version --client" '[0-9]+\.[0-9]+\.[0-9]+'
       ;;
-    age)
-      check_tool "age" "$version" "age --version" '[0-9]+\.[0-9]+\.[0-9]+'
-      ;;
-    sops)
-      check_tool "sops" "$version" "sops --version" '[0-9]+\.[0-9]+\.[0-9]+'
+    vault)
+      check_tool "vault" "$version" "vault version" '[0-9]+\.[0-9]+\.[0-9]+'
       ;;
     ansible)
       check_tool "ansible" "$version" "ansible --version | head -1" '[0-9]+\.[0-9]+\.[0-9]+'
