@@ -65,7 +65,7 @@ while IFS=' ' read -r tool version; do
       check_tool "vault" "$version" "vault version" '[0-9]+\.[0-9]+\.[0-9]+'
       ;;
     ansible)
-      check_tool "ansible" "$version" "ansible --version | head -1" '[0-9]+\.[0-9]+\.[0-9]+'
+      check_tool "ansible" "$version" "mise current ansible 2>/dev/null || ansible --version | head -1" '[0-9]+\.[0-9]+\.[0-9]+'
       ;;
     helm)
       check_tool "helm" "$version" "helm version --short" '[0-9]+\.[0-9]+\.[0-9]+'
