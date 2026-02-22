@@ -25,14 +25,6 @@ jobs:
         uses: gitleaks/gitleaks-action@v2
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          # Scan only new commits on PRs; scan full history on pushes to main
-          args: >-
-            detect
-            --source .
-            ${{ github.event_name == 'pull_request' && format('--log-opts "origin/{0}..HEAD"', github.base_ref) || '' }}
-            --redact
-            --exit-code 1
 
   trivy-scan:
     name: Trivy IaC and secrets scan
