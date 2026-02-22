@@ -1,0 +1,27 @@
+#cloud-config
+hostname: k3s-worker-01
+fqdn: k3s-worker-01.local
+manage_etc_hosts: true
+locale: en_US.UTF-8
+timezone: UTC
+
+users:
+  - name: ubuntu
+    groups: [sudo]
+    shell: /bin/bash
+    ssh_authorized_keys:
+      - ${ssh_public_key}
+    sudo: ALL=(ALL) NOPASSWD:ALL
+
+ssh_pwauth: false
+
+packages:
+  - qemu-guest-agent
+  - curl
+  - ca-certificates
+
+package_update: true
+package_upgrade: true
+
+runcmd:
+  - systemctl enable --now qemu-guest-agent
