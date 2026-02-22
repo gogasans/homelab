@@ -1,0 +1,78 @@
+# HashiCorp Vault Helm values
+# Chart: hashicorp/vault v0.29.1
+#
+# Design decisions documented here:
+#   - Single replica (ha.enabled: false) because we have 1 control plane node.
+#     HA Vault requires 3+ replicas for Raft quorum. Future work: add replicas with 3rd Proxmox host.
+#   - Raft integrated storage (no external database).
+#   - UI enabled for operational convenience (access via Traefik IngressRoute in configs/).
+#   - Vault Agent injector disabled — we use External Secrets Operator instead.
+#   - Auto-unseal not configured — manual unseal required after pod restart (see ADR 004).
+
+global:
+  enabled: true
+
+injector:
+  # ESO handles secret injection — no need for the Vault Agent sidecar injector.
+  enabled: false
+
+server:
+  enabled: true
+  image:
+    tag: "1.19.0"  # Pin Vault version independently from the chart version
+
+  # Resource limits tuned for a homelab control plane VM with 8 GB RAM
+  resources:
+    requests:
+      memory: 256Mi
+      cpu: 250m
+    limits:
+      memory: 512Mi
+      cpu: 500m
+
+  # Readiness and liveness probes
+  readinessProbe:
+    enabled: true
+    path: /v1/sys/health?standbyok=true
+  livenessProbe:
+    enabled: true
+    path: /v1/sys/health?standbyok=true
+    initialDelaySeconds: 60
+
+  # Raft integrated storage backend
+  # Data stored on a persistent volume — no external database required.
+  ha:
+    enabled: false  # Single replica for a 2-node homelab. See design decision above.
+
+  standalone:
+    enabled: true
+    config: |
+      ui = true
+
+      listener "tcp" {
+        tls_disable = 1  # TLS is terminated at the Traefik ingress layer
+        address = "[::]:8200"
+        cluster_address = "[::]:8201"
+      }
+
+      storage "raft" {
+        path = "/vault/data"
+        node_id = "vault-0"
+      }
+
+      # Allow Vault to expose metrics for Prometheus scraping
+      telemetry {
+        prometheus_retention_time = "30s"
+        disable_hostname = true
+      }
+
+  dataStorage:
+    enabled: true
+    size: 10Gi
+    # Uses the cluster default StorageClass (local-path-provisioner initially, Longhorn after Phase 6)
+    storageClass: null
+    accessMode: ReadWriteOnce
+
+ui:
+  enabled: true
+  serviceType: ClusterIP  # Exposed via Traefik IngressRoute, not directly

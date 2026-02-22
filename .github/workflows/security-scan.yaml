@@ -1,0 +1,59 @@
+name: Security Scan
+
+on:
+  push:
+    branches: ["**"]
+  pull_request:
+    branches: ["**"]
+
+permissions:
+  contents: read
+  security-events: write  # Required to upload SARIF to GitHub Security tab
+  actions: read           # Required by codeql-action/upload-sarif to fetch workflow run metadata
+
+jobs:
+  secrets-scan:
+    name: Secrets scan (gitleaks)
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout (full history for gitleaks)
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Run gitleaks
+        uses: gitleaks/gitleaks-action@v2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          # Scan only new commits on PRs; scan full history on pushes to main
+          args: >-
+            detect
+            --source .
+            ${{ github.event_name == 'pull_request' && format('--log-opts "origin/{0}..HEAD"', github.base_ref) || '' }}
+            --redact
+            --exit-code 1
+
+  trivy-scan:
+    name: Trivy IaC and secrets scan
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Run trivy filesystem scan
+        uses: aquasecurity/trivy-action@0.30.0
+        with:
+          scan-type: fs
+          scan-ref: .
+          scanners: secret,config
+          severity: HIGH,CRITICAL
+          exit-code: 1
+          format: sarif
+          output: trivy-results.sarif
+
+      - name: Upload SARIF to GitHub Security tab
+        if: always()  # Upload even on scan failure so results are visible
+        uses: github/codeql-action/upload-sarif@v4
+        with:
+          sarif_file: trivy-results.sarif

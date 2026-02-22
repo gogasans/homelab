@@ -1,0 +1,43 @@
+name: Lint OpenTofu
+
+on:
+  pull_request:
+    paths:
+      - "tofu/**"
+
+permissions:
+  contents: read
+
+jobs:
+  tofu-lint:
+    name: Format, validate, and scan
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: tofu/environments/homelab
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up OpenTofu
+        uses: opentofu/setup-opentofu@v1
+        with:
+          tofu_version: "1.9.0"
+
+      - name: Check formatting
+        run: tofu fmt -check -recursive ../../..
+
+      - name: Initialize (no backend)
+        run: tofu init -backend=false -input=false
+
+      - name: Validate
+        run: tofu validate
+
+      - name: Scan with trivy
+        uses: aquasecurity/trivy-action@0.30.0
+        with:
+          scan-type: config
+          scan-ref: tofu/
+          severity: HIGH,CRITICAL
+          exit-code: 1

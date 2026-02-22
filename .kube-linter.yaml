@@ -1,0 +1,16 @@
+# kube-linter configuration
+# https://docs.kubelinter.io/#/configuring-kubelinter
+
+checks:
+  # Start with the default set and add/remove as needed
+  addAllBuiltIn: true
+  exclude:
+    # Flux system components are managed by flux bootstrap — skip linting them
+    - "no-read-only-root-fs"     # Some Flux controllers require writable root
+  include: []
+
+customChecks: []
+
+# Ignore the auto-generated flux-system directory
+ignorePaths:
+  - "kubernetes/clusters/homelab/flux-system/**"

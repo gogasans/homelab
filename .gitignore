@@ -1,0 +1,49 @@
+# Secrets — never commit these
+vault-keys.json        # vault operator init output — store in password manager immediately
+*.pem
+*.p12
+
+# Kubeconfig — contains cluster credentials
+kubeconfig
+*.kubeconfig
+.kube/
+
+# OpenTofu / Terraform state and local files
+**/.terraform/
+*.tfstate
+*.tfstate.*
+*.tfstate.backup
+.terraform.lock.hcl
+terraform.tfvars
+*.auto.tfvars
+# Allow the example file
+!terraform.tfvars.example
+
+# Ansible sensitive files
+ansible/inventory/hosts_local.yaml
+ansible/*.retry
+*.vault_pass
+
+# Claude configuration (local only — not for public consumption)
+.claude/
+
+# OS and editor artifacts
+.DS_Store
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+
+# Python (used by Ansible)
+__pycache__/
+*.pyc
+.venv/
+venv/
+
+# Helm
+*.tgz
+
+# Temporary files
+*.tmp
+*.bak

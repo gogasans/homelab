@@ -1,0 +1,32 @@
+name: Lint Ansible
+
+on:
+  pull_request:
+    paths:
+      - "ansible/**"
+
+permissions:
+  contents: read
+
+jobs:
+  ansible-lint:
+    name: ansible-lint
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install ansible and ansible-lint
+        run: |
+          pip install --upgrade pip
+          pip install ansible==11.2.0 ansible-lint==25.1.3
+
+      - name: Run ansible-lint
+        working-directory: ansible
+        run: ansible-lint --profile production
