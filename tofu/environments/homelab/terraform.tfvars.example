@@ -1,0 +1,76 @@
+# terraform.tfvars.example
+#
+# Copy this file to terraform.tfvars and fill in your values.
+# terraform.tfvars is gitignored — never commit it.
+#
+# The Proxmox API token is NOT here. Export it as an environment variable:
+#   export PROXMOX_VE_API_TOKEN="root@pam!opentofu=xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx"
+
+# ---------------------------------------------------------------------------
+# Proxmox connection
+# ---------------------------------------------------------------------------
+
+# API endpoint for the Proxmox cluster (or primary node if standalone)
+proxmox_endpoint = "https://<proxmox-ip>:8006"
+
+# Set to true if Proxmox uses a self-signed certificate (default for new installs)
+proxmox_insecure = true
+
+# ---------------------------------------------------------------------------
+# Storage
+# Run `pvesm status` on the Proxmox host to get the exact names.
+# ---------------------------------------------------------------------------
+
+# Storage pool for VM OS disks and data disks (must support "images" content type)
+vm_disk_storage = "local-lvm"
+
+# Storage pool for cloud-init snippet files (must have "snippets" content type enabled)
+snippets_storage = "local"
+
+# ---------------------------------------------------------------------------
+# Network
+# Run `ip link show | grep vmbr` on the Proxmox host to list bridges.
+# ---------------------------------------------------------------------------
+
+network_bridge = "vmbr0"
+gateway        = "<gateway-ip>"
+dns_servers    = ["<dns-server-1>", "<dns-server-2>"]
+
+# ---------------------------------------------------------------------------
+# VM template
+# ID of the Ubuntu 24.04 cloud-init template created during Proxmox bootstrap.
+# The node is where the template was created; other VMs clone across nodes automatically.
+# ---------------------------------------------------------------------------
+
+template_id   = 9000
+template_node = "pve1"
+
+# ---------------------------------------------------------------------------
+# SSH public key
+# Injected into all VMs via cloud-init. Use the corresponding private key for
+# SSH access and Ansible. Never put the private key here.
+# ---------------------------------------------------------------------------
+
+ssh_public_key = "ssh-ed25519 AAAA... you@yourhost"
+
+# ---------------------------------------------------------------------------
+# Control plane VM — k3s-cp-01 (runs on pve1)
+# ---------------------------------------------------------------------------
+
+cp_node          = "pve1"
+cp_ip_address    = "<cp-ip>/24"
+cp_cores         = 4
+cp_memory_mb     = 8192
+cp_os_disk_gb    = 50
+cp_data_disk_gb  = 100   # Longhorn disk
+
+# ---------------------------------------------------------------------------
+# Worker VM — k3s-worker-01 (runs on pve2, cloned cross-node from template on pve1)
+# ---------------------------------------------------------------------------
+
+worker_node         = "pve2"
+worker_ip_address   = "<worker-ip>/24"
+worker_cores        = 6
+worker_memory_mb    = 16384
+worker_os_disk_gb   = 50
+worker_data_disk_gb = 100   # Longhorn disk
