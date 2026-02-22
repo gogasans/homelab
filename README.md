@@ -53,27 +53,16 @@ entirely via GitOps with FluxCD.
 
 ## Prerequisites
 
-Install all tools at the pinned versions in [.tool-versions](.tool-versions):
+Install all tools at the pinned versions in [.tool-versions](.tool-versions) using [mise](https://mise.jdx.dev):
 
 ```bash
-# 1. Install asdf if not already installed (macOS)
-brew install asdf
-echo 'source "$(brew --prefix asdf)/libexec/asdf.sh"' >> ~/.zshrc
+# Install mise (macOS)
+brew install mise
+echo 'eval "$(mise activate zsh)"' >> ~/.zshrc
 source ~/.zshrc
 
-# 2. Add the required plugins (one-time)
-asdf plugin add opentofu
-asdf plugin add kubectl
-asdf plugin add flux2
-asdf plugin add vault
-asdf plugin add ansible
-asdf plugin add helm
-asdf plugin add kubeconform
-asdf plugin add kube-linter
-asdf plugin add gitleaks
-
-# 3. Install all tools at pinned versions
-asdf install
+# Install all tools at pinned versions (reads .tool-versions automatically)
+mise install
 ```
 
 Verify all tools are installed correctly:

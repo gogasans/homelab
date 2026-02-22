@@ -87,7 +87,7 @@ done < "$TOOL_VERSIONS_FILE"
 
 echo "---------------------------------------------------"
 if [ $FAILED -eq 1 ]; then
-  echo -e "${RED}Some required tools are missing. Install them with: asdf install${NC}"
+  echo -e "${RED}Some required tools are missing. Install them with: mise install${NC}"
   exit 1
 else
   echo -e "${GREEN}All required tools are installed.${NC}"
