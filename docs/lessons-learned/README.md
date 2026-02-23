@@ -26,6 +26,27 @@ Each entry follows this structure:
 
 ## Entries
 
+### 2026-02-22 — Use a dynamic inventory script instead of a static hosts file for tofu-managed infra
+
+**Phase:** Phase 1 / Ansible setup
+**What happened:** `ansible/inventory/hosts.yaml` was written with hardcoded IPs
+(`192.168.10.120`, `192.168.10.121`). These are already defined in the gitignored
+`terraform.tfvars` and exported as OpenTofu outputs. Committing them to the repo creates
+a sync hazard and leaks private network topology.
+**Why it happened:** The static hosts file is the simplest starting point, but it duplicates
+information that OpenTofu already owns.
+**How it was fixed:** Replaced `hosts.yaml` with `inventory/tofu_inventory.py`, a Python
+dynamic inventory script that calls `tofu output -json` at runtime and maps the outputs to
+Ansible's inventory JSON format. `ansible.cfg` now points to the inventory directory
+(`inventory/`) instead of a specific file, so Ansible discovers the script automatically.
+**What to remember:** For any infra managed by OpenTofu, drive Ansible inventory from
+`tofu output` — not from a second source of truth. The `community.general.terraform_state`
+inventory plugin was considered but rejected: `bpg/proxmox` stores IPs in deeply nested
+state attributes with CIDR notation, and the plugin does not filter resource types, so
+cloud-init file resources would also appear as inventory hosts.
+
+---
+
 ### 2026-02-22 — Use mise instead of asdf for tool version management
 
 **Phase:** Phase 0 / setup

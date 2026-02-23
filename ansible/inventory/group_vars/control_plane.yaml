@@ -1,0 +1,2 @@
+# Variables specific to control plane nodes.
+# Role-level configuration lives in roles/k3s-server/ (Phase 2).
