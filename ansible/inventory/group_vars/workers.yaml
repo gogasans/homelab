@@ -1,0 +1,2 @@
+# Variables specific to worker nodes.
+# Role-level configuration lives in roles/k3s-agent/ (Phase 2).

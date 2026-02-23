@@ -1,0 +1,8 @@
+# Common variables applied to all nodes.
+# Credentials are never stored here — use SSH agent + environment variables.
+
+ansible_user: ubuntu
+
+# k3s version pinned across all nodes. Never use "latest".
+# To upgrade: update this value, run site.yaml, verify with: kubectl get nodes
+k3s_version: v1.32.2+k3s1
