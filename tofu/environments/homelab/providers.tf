@@ -16,9 +16,8 @@ provider "proxmox" {
   # Never set it here or in terraform.tfvars.
 
   ssh {
-    agent    = true
-    username = "root"
-    # Requires the Proxmox root SSH key to be loaded in ssh-agent before running tofu.
-    # Run: ssh-add ~/.ssh/<your-proxmox-key>
+    agent        = true
+    agent_socket = var.ssh_agent_socket
+    username     = "root"
   }
 }
