@@ -29,10 +29,9 @@ Each entry follows this structure:
 ### 2026-02-22 — Use a dynamic inventory script instead of a static hosts file for tofu-managed infra
 
 **Phase:** Phase 1 / Ansible setup
-**What happened:** `ansible/inventory/hosts.yaml` was written with hardcoded IPs
-(`192.168.10.120`, `192.168.10.121`). These are already defined in the gitignored
-`terraform.tfvars` and exported as OpenTofu outputs. Committing them to the repo creates
-a sync hazard and leaks private network topology.
+**What happened:** `ansible/inventory/hosts.yaml` was written with hardcoded VM IP addresses.
+These are already defined in the gitignored `terraform.tfvars` and exported as OpenTofu
+outputs. Committing them to the repo creates a sync hazard and leaks private network topology.
 **Why it happened:** The static hosts file is the simplest starting point, but it duplicates
 information that OpenTofu already owns.
 **How it was fixed:** Replaced `hosts.yaml` with `inventory/tofu_inventory.py`, a Python
