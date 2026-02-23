@@ -13,6 +13,12 @@ variable "proxmox_insecure" {
   default     = false
 }
 
+variable "ssh_agent_socket" {
+  description = "Path to the SSH agent socket used by the bpg provider for file uploads. Defaults to SSH_AUTH_SOCK. Set explicitly when using 1Password SSH agent on macOS."
+  type        = string
+  default     = null
+}
+
 # ---------------------------------------------------------------------------
 # Storage
 # ---------------------------------------------------------------------------

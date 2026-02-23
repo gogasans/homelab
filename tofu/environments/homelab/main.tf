@@ -4,7 +4,7 @@ module "cp" {
   vm_name      = "k3s-cp-01"
   description  = "k3s control plane node"
   proxmox_node = var.cp_node
-  vm_id        = 100
+  vm_id        = 300
 
   template_id   = var.template_id
   template_node = var.template_node
@@ -32,7 +32,7 @@ module "worker" {
   vm_name      = "k3s-worker-01"
   description  = "k3s worker node"
   proxmox_node = var.worker_node
-  vm_id        = 101
+  vm_id        = 301
 
   template_id   = var.template_id
   template_node = var.template_node
