@@ -13,7 +13,7 @@ during a restart.
 ## How to know Vault is sealed
 
 ```bash
-make vault-status
+task vault-status
 ```
 
 If the output includes `Sealed: true`, Vault needs to be unsealed.
@@ -28,7 +28,7 @@ You may also notice:
 ## Quick unseal (recommended)
 
 ```bash
-make vault-unseal
+task vault-unseal
 ```
 
 This runs `scripts/vault-unseal.sh` which:
