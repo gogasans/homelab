@@ -76,6 +76,9 @@ while IFS=' ' read -r tool version; do
     kube-linter)
       check_tool "kube-linter" "$version" "kube-linter version" '[0-9]+\.[0-9]+\.[0-9]+'
       ;;
+    trivy)
+      check_tool "trivy" "$version" "trivy --version" '[0-9]+\.[0-9]+\.[0-9]+'
+      ;;
     gitleaks)
       check_tool "gitleaks" "$version" "gitleaks version" '[0-9]+\.[0-9]+\.[0-9]+'
       ;;

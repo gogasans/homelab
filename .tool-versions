@@ -11,5 +11,6 @@ ansible 11.2.0
 helm 3.17.1
 kubeconform 0.6.7
 kube-linter 0.7.2
+trivy 0.69.1
 gitleaks 8.24.0
 uv 0.9.18
