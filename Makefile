@@ -1,4 +1,4 @@
-.PHONY: help lint lint-tofu lint-ansible lint-k8s prereqs \
+.PHONY: help lint lint-tofu lint-ansible lint-k8s prereqs setup \
         tofu-plan tofu-apply tofu-destroy \
         ansible-run ansible-check \
         flux-bootstrap flux-status \
@@ -15,6 +15,10 @@ help: ## Show this help message
 		awk 'BEGIN {FS = ":.*##"}; {printf "  \033[36m%-22s\033[0m %s\n", $$1, $$2}'
 
 # ── Prerequisites ───────────────────────────────────────────────────────────
+
+setup: ## Install all prerequisites (mise tools + uv tools)
+	mise install
+	uv tool install ansible-lint==25.1.3
 
 prereqs: ## Verify all required tools are installed at pinned versions
 	@scripts/check-prerequisites.sh

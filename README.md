@@ -53,22 +53,19 @@ entirely via GitOps with FluxCD.
 
 ## Prerequisites
 
-Install all tools at the pinned versions in [.tool-versions](.tool-versions) using [mise](https://mise.jdx.dev):
+First, install [mise](https://mise.jdx.dev) and [pipx](https://pipx.pypa.io) if you don't have them:
 
 ```bash
-# Install mise (macOS)
-brew install mise
+brew install mise pipx
 echo 'eval "$(mise activate zsh)"' >> ~/.zshrc
 source ~/.zshrc
-
-# Install all tools at pinned versions (reads .tool-versions automatically)
-mise install
 ```
 
-Verify all tools are installed correctly:
+Then install all tools at pinned versions and verify:
 
 ```bash
-make prereqs
+make setup    # installs mise tools + pipx packages
+make prereqs  # verifies everything is installed correctly
 ```
 
 ## Getting started
