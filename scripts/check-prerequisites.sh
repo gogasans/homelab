@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # check-prerequisites.sh
 # Verifies that all required tools are installed at the versions pinned in .tool-versions.
-# Run: make prereqs
+# Run: task prereqs
 
 set -euo pipefail
 
@@ -79,6 +79,9 @@ while IFS=' ' read -r tool version; do
     gitleaks)
       check_tool "gitleaks" "$version" "gitleaks version" '[0-9]+\.[0-9]+\.[0-9]+'
       ;;
+    task)
+      check_tool "task" "$version" "task --version" '[0-9]+\.[0-9]+\.[0-9]+'
+      ;;
     uv)
       check_tool "uv" "$version" "uv --version" '[0-9]+\.[0-9]+\.[0-9]+'
       ;;
@@ -110,7 +113,7 @@ if [ $FAILED -eq 1 ]; then
   echo -e "${RED}Some required tools are missing.${NC}"
   echo -e "  mise-managed tools: ${YELLOW}mise install${NC}"
   echo -e "  uv-managed tools:   ${YELLOW}uv tool install ansible-lint==25.1.3 --with ansible==11.2.0 --python 3.12${NC}"
-  echo -e "  or run both at once: ${YELLOW}make setup${NC}"
+  echo -e "  or run both at once: ${YELLOW}task setup${NC}"
   exit 1
 else
   echo -e "${GREEN}All required tools are installed.${NC}"
