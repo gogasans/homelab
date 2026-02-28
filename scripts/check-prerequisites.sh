@@ -101,8 +101,10 @@ echo "---------------------------------------------------"
 
 REQUIREMENTS_FILE="$ROOT_DIR/requirements.txt"
 if [ -f "$REQUIREMENTS_FILE" ]; then
-  while IFS='==' read -r pkg expected_version; do
-    [[ -z "$pkg" || "$pkg" == \#* ]] && continue
+  while IFS= read -r line; do
+    [[ -z "$line" || "$line" == \#* ]] && continue
+    pkg="${line%%==*}"
+    expected_version="${line##*==}"
     case "$pkg" in
       ansible-lint)
         check_tool "ansible-lint" "$expected_version" "ansible-lint --version" '[0-9]+\.[0-9]+\.[0-9]+'
