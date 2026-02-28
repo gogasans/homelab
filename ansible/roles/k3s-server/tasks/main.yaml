@@ -1,0 +1,68 @@
+---
+- name: Create k3s config directory
+  ansible.builtin.file:
+    path: "{{ k3s_config_dir }}"
+    state: directory
+    owner: root
+    group: root
+    mode: "0755"
+
+- name: Write k3s server config
+  ansible.builtin.copy:
+    dest: "{{ k3s_config_dir }}/config.yaml"
+    owner: root
+    group: root
+    mode: "0600"
+    content: |
+      disable:
+        - traefik
+        - servicelb
+      cluster-init: true
+      write-kubeconfig-mode: "0640"
+  notify: Restart k3s
+
+- name: Check if k3s is already installed at the correct version
+  ansible.builtin.command:
+    cmd: k3s --version
+  register: k3s_installed_version
+  changed_when: false
+  failed_when: false
+
+- name: Install k3s server
+  ansible.builtin.shell:
+    cmd: |
+      set -o pipefail
+      curl -fsL {{ k3s_install_script_url }} | \
+        INSTALL_K3S_VERSION={{ k3s_version }} \
+        INSTALL_K3S_EXEC="server" \
+        sh -
+  args:
+    executable: /bin/bash
+  when: >
+    k3s_installed_version.rc != 0 or
+    k3s_version not in k3s_installed_version.stdout
+  notify: Restart k3s
+
+- name: Enable and start k3s service
+  ansible.builtin.systemd:
+    name: k3s
+    state: started
+    enabled: true
+    daemon_reload: true
+
+- name: Wait for k3s API server to become ready
+  ansible.builtin.wait_for:
+    host: 127.0.0.1
+    port: 6443
+    timeout: 120
+
+- name: Wait for node to reach Ready state
+  ansible.builtin.command:
+    cmd: kubectl get node {{ inventory_hostname }} --no-headers
+  register: node_status
+  until: "'Ready' in node_status.stdout"
+  retries: 20
+  delay: 10
+  changed_when: false
+  environment:
+    KUBECONFIG: /etc/rancher/k3s/k3s.yaml

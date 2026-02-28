@@ -1,0 +1,9 @@
+---
+# Applies the common role to all nodes.
+# Disables swap, loads required kernel modules, applies sysctl params, installs packages.
+# Run this playbook twice to verify idempotency (second run must show changed=0).
+- name: Prepare all nodes for k3s
+  hosts: all
+  become: true
+  roles:
+    - role: common

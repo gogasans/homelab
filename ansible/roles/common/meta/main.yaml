@@ -1,0 +1,9 @@
+---
+galaxy_info:
+  role_name: common
+  description: >
+    Prepares all k3s nodes: disables swap, loads kernel modules, applies sysctl
+    parameters, installs required packages, and ensures qemu-guest-agent is running.
+  min_ansible_version: "2.15"
+
+dependencies: []

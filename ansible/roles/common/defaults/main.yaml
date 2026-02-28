@@ -1,0 +1,18 @@
+---
+# Packages required on every node before k3s installation.
+common_packages:
+  - curl
+  - ca-certificates
+  - apt-transport-https
+  - gnupg
+  - qemu-guest-agent
+  - open-iscsi
+  - nfs-common
+
+# sysctl parameters required by k3s / Flannel / iptables-based networking.
+common_sysctl_params:
+  net.ipv4.ip_forward: 1
+  net.bridge.bridge-nf-call-iptables: 1
+  net.bridge.bridge-nf-call-ip6tables: 1
+  fs.inotify.max_user_watches: 524288
+  fs.inotify.max_user_instances: 512

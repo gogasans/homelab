@@ -1,0 +1,27 @@
+---
+# Rollback playbook — removes k3s from all nodes.
+# Run this to fully uninstall k3s and return nodes to a clean OS state.
+#
+# WARNING: This is destructive. All running workloads and cluster state will be lost.
+# Use make ansible-teardown which prompts for confirmation before running this playbook.
+#
+# After teardown, re-run site.yaml to reinstall from scratch.
+- name: Uninstall k3s from worker nodes
+  hosts: workers
+  become: true
+  tasks:
+    - name: Run k3s-agent uninstall script
+      ansible.builtin.command:
+        cmd: /usr/local/bin/k3s-agent-uninstall.sh
+      args:
+        removes: /usr/local/bin/k3s-agent-uninstall.sh
+
+- name: Uninstall k3s from control plane
+  hosts: control_plane
+  become: true
+  tasks:
+    - name: Run k3s uninstall script
+      ansible.builtin.command:
+        cmd: /usr/local/bin/k3s-uninstall.sh
+      args:
+        removes: /usr/local/bin/k3s-uninstall.sh

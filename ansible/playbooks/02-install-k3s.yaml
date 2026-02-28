@@ -1,0 +1,18 @@
+---
+# Installs k3s on all nodes in the correct order:
+#   1. Control plane first (k3s-server role)
+#   2. Workers second (k3s-agent role, which delegates token retrieval to the CP)
+#
+# The join token is never stored anywhere — it is read live from the control plane
+# using ansible.builtin.slurp and exists only in memory for the duration of the play.
+- name: Install k3s control plane
+  hosts: control_plane
+  become: true
+  roles:
+    - role: k3s-server
+
+- name: Join worker nodes to the cluster
+  hosts: workers
+  become: true
+  roles:
+    - role: k3s-agent
