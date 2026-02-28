@@ -12,7 +12,7 @@
     dest: "{{ k3s_server_config_dir }}/config.yaml"
     owner: root
     group: root
-    mode: "0600"
+    mode: "0644"
     content: |
       disable:
         - traefik
@@ -71,3 +71,27 @@
   when: not ansible_check_mode
   environment:
     KUBECONFIG: /etc/rancher/k3s/k3s.yaml
+
+- name: Create .kube directory for ubuntu user
+  ansible.builtin.file:
+    path: /home/ubuntu/.kube
+    state: directory
+    owner: ubuntu
+    group: ubuntu
+    mode: "0700"
+
+- name: Copy kubeconfig to ubuntu home directory
+  ansible.builtin.copy:
+    src: /etc/rancher/k3s/k3s.yaml
+    dest: /home/ubuntu/.kube/config
+    owner: ubuntu
+    group: ubuntu
+    mode: "0600"
+    remote_src: true
+  when: not ansible_check_mode
+
+- name: Set KUBECONFIG in ubuntu .bashrc
+  ansible.builtin.lineinfile:
+    path: /home/ubuntu/.bashrc
+    line: "export KUBECONFIG=/home/ubuntu/.kube/config"
+    create: false
