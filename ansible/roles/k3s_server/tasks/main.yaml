@@ -50,12 +50,14 @@
     state: started
     enabled: true
     daemon_reload: true
+  when: not ansible_check_mode
 
 - name: Wait for k3s API server to become ready
   ansible.builtin.wait_for:
     host: 127.0.0.1
     port: 6443
     timeout: 120
+  when: not ansible_check_mode
 
 - name: Wait for node to reach Ready state
   ansible.builtin.command:
@@ -65,5 +67,6 @@
   retries: 20
   delay: 10
   changed_when: false
+  when: not ansible_check_mode
   environment:
     KUBECONFIG: /etc/rancher/k3s/k3s.yaml
