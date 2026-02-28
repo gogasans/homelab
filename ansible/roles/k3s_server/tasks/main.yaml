@@ -1,7 +1,7 @@
 ---
 - name: Create k3s config directory
   ansible.builtin.file:
-    path: "{{ k3s_config_dir }}"
+    path: "{{ k3s_server_config_dir }}"
     state: directory
     owner: root
     group: root
@@ -9,7 +9,7 @@
 
 - name: Write k3s server config
   ansible.builtin.copy:
-    dest: "{{ k3s_config_dir }}/config.yaml"
+    dest: "{{ k3s_server_config_dir }}/config.yaml"
     owner: root
     group: root
     mode: "0600"
@@ -32,12 +32,13 @@
   ansible.builtin.shell:
     cmd: |
       set -o pipefail
-      curl -fsL {{ k3s_install_script_url }} | \
+      curl -fsL {{ k3s_server_install_script_url }} | \
         INSTALL_K3S_VERSION={{ k3s_version }} \
         INSTALL_K3S_EXEC="server" \
         sh -
   args:
     executable: /bin/bash
+  changed_when: true
   when: >
     k3s_installed_version.rc != 0 or
     k3s_version not in k3s_installed_version.stdout

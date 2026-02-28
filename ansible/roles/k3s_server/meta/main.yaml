@@ -1,6 +1,8 @@
 ---
 galaxy_info:
-  role_name: k3s-server
+  role_name: k3s_server
+  author: homelab
+  license: MIT
   description: >
     Installs and configures k3s as a control plane server. Writes config.yaml with
     Traefik and ServiceLB disabled. Waits for the API server and node to reach Ready.

@@ -6,5 +6,8 @@
 #   ansible-playbook playbooks/site.yaml          # full run
 #   ansible-playbook playbooks/site.yaml --check  # dry-run
 #   ansible-playbook playbooks/site.yaml --tags prepare  # targeted run
-- import_playbook: 01-prepare-nodes.yaml
-- import_playbook: 02-install-k3s.yaml
+- name: Prepare all nodes
+  import_playbook: 01-prepare-nodes.yaml
+
+- name: Install k3s
+  import_playbook: 02-install-k3s.yaml

@@ -1,0 +1,4 @@
+---
+# k3s_version is intentionally set in group_vars/all.yaml, not here.
+# Role-private defaults — prefixed per ansible-lint var-naming rules.
+k3s_agent_install_script_url: https://get.k3s.io

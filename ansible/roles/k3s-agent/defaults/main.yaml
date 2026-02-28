@@ -1,5 +1,0 @@
----
-# Overridden by group_vars/all.yaml — kept here as documentation of the variable.
-k3s_version: v1.32.2+k3s1
-
-k3s_install_script_url: https://get.k3s.io

@@ -18,7 +18,7 @@ help: ## Show this help message
 
 setup: ## Install all prerequisites (mise tools + uv tools)
 	mise install
-	uv tool install ansible-lint==25.1.3
+	uv tool install ansible-lint==25.1.3 --with ansible==11.2.0 --python 3.12
 
 prereqs: ## Verify all required tools are installed at pinned versions
 	@scripts/check-prerequisites.sh

@@ -27,7 +27,7 @@
   ansible.builtin.shell:
     cmd: |
       set -o pipefail
-      curl -fsL {{ k3s_install_script_url }} | \
+      curl -fsL {{ k3s_agent_install_script_url }} | \
         INSTALL_K3S_VERSION={{ k3s_version }} \
         INSTALL_K3S_EXEC="agent" \
         K3S_URL={{ k3s_server_url }} \
@@ -35,6 +35,7 @@
         sh -
   args:
     executable: /bin/bash
+  changed_when: true
   when: >
     k3s_installed_version.rc != 0 or
     k3s_version not in k3s_installed_version.stdout

@@ -109,7 +109,7 @@ echo "---------------------------------------------------"
 if [ $FAILED -eq 1 ]; then
   echo -e "${RED}Some required tools are missing.${NC}"
   echo -e "  mise-managed tools: ${YELLOW}mise install${NC}"
-  echo -e "  uv-managed tools:   ${YELLOW}uv tool install ansible-lint==25.1.3${NC}"
+  echo -e "  uv-managed tools:   ${YELLOW}uv tool install ansible-lint==25.1.3 --with ansible==11.2.0 --python 3.12${NC}"
   echo -e "  or run both at once: ${YELLOW}make setup${NC}"
   exit 1
 else
