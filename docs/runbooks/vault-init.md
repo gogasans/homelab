@@ -18,7 +18,7 @@ Losing the unseal keys means permanent, irrecoverable loss of all secrets in Vau
 
 Verify Vault pod is running but sealed:
 ```bash
-make vault-status
+task vault-status
 # Expected output includes: Sealed: true, Initialized: false
 ```
 
@@ -81,7 +81,7 @@ After the script completes:
 
 ```bash
 # Check seal status
-make vault-status
+task vault-status
 # Expected: Sealed: false
 
 # Verify the secrets engine is enabled

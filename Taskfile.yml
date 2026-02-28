@@ -1,0 +1,122 @@
+# https://taskfile.dev
+version: '3'
+
+vars:
+  HOMELAB_ENV: environments/homelab
+  TOFU_DIR: tofu/{{.HOMELAB_ENV}}
+  ANSIBLE_DIR: ansible
+  K8S_DIR: kubernetes
+  CLUSTER: homelab
+
+tasks:
+  # ── Prerequisites ──────────────────────────────────────────────────────────
+
+  setup:
+    desc: Install all prerequisites (mise tools + uv tools)
+    cmds:
+      - mise install
+      - uv tool install ansible-lint==25.1.3 --with ansible==11.2.0 --python 3.12
+
+  prereqs:
+    desc: Verify all required tools are installed at pinned versions
+    cmds:
+      - scripts/check-prerequisites.sh
+
+  # ── Linting ────────────────────────────────────────────────────────────────
+
+  lint:
+    desc: Run all linters
+    deps: [lint-tofu, lint-ansible, lint-k8s]
+
+  lint-tofu:
+    desc: Lint OpenTofu code (fmt-check + validate + trivy)
+    cmds:
+      - echo "==> Checking OpenTofu formatting..."
+      - tofu -chdir={{.TOFU_DIR}} fmt -check -recursive
+      - echo "==> Validating OpenTofu configuration..."
+      - tofu -chdir={{.TOFU_DIR}} init -backend=false -input=false
+      - tofu -chdir={{.TOFU_DIR}} validate
+      - echo "==> Scanning OpenTofu config with trivy..."
+      - trivy config tofu/
+
+  lint-ansible:
+    desc: Lint Ansible playbooks and roles
+    dir: '{{.ANSIBLE_DIR}}'
+    cmds:
+      - ansible-lint --profile production
+
+  lint-k8s:
+    desc: Lint Kubernetes manifests (kubeconform + kube-linter)
+    cmds:
+      - echo "==> Validating Kubernetes manifests with kubeconform..."
+      - kubeconform -strict -summary -kubernetes-version 1.32.0 -ignore-missing-schemas {{.K8S_DIR}}/
+      - echo "==> Linting Kubernetes manifests with kube-linter..."
+      - kube-linter lint {{.K8S_DIR}}/ --config .kube-linter.yaml
+
+  # ── OpenTofu ───────────────────────────────────────────────────────────────
+
+  tofu-plan:
+    desc: Plan OpenTofu changes (requires PROXMOX_VE_API_TOKEN env var)
+    cmds:
+      - scripts/tofu-plan.sh
+
+  tofu-apply:
+    desc: Apply OpenTofu changes (requires PROXMOX_VE_API_TOKEN env var)
+    cmds:
+      - tofu -chdir={{.TOFU_DIR}} apply
+
+  tofu-destroy:
+    desc: Destroy OpenTofu-managed resources (DANGEROUS)
+    prompt: 'WARNING: This will destroy all VMs. Do you want to continue?'
+    cmds:
+      - tofu -chdir={{.TOFU_DIR}} destroy
+
+  # ── Ansible ────────────────────────────────────────────────────────────────
+
+  ansible-run:
+    desc: Run the full site.yaml playbook
+    dir: '{{.ANSIBLE_DIR}}'
+    cmds:
+      - ansible-playbook playbooks/site.yaml
+
+  ansible-check:
+    desc: Dry-run the site.yaml playbook (check mode)
+    dir: '{{.ANSIBLE_DIR}}'
+    cmds:
+      - ansible-playbook --check playbooks/site.yaml
+
+  ansible-teardown:
+    desc: Remove k3s from all nodes (rollback)
+    prompt: 'WARNING: This will remove k3s from all nodes. Do you want to continue?'
+    dir: '{{.ANSIBLE_DIR}}'
+    cmds:
+      - ansible-playbook playbooks/99-teardown.yaml
+
+  # ── FluxCD ─────────────────────────────────────────────────────────────────
+
+  flux-bootstrap:
+    desc: Bootstrap FluxCD (requires GITHUB_TOKEN env var)
+    cmds:
+      - scripts/bootstrap.sh
+
+  flux-status:
+    desc: Show status of all Flux resources
+    cmds:
+      - flux get all -A
+
+  flux-reconcile:
+    desc: Force reconcile all Flux Kustomizations
+    cmds:
+      - flux reconcile kustomization flux-system --with-source
+
+  # ── Vault ──────────────────────────────────────────────────────────────────
+
+  vault-unseal:
+    desc: Unseal Vault after a pod restart (interactive — prompts for unseal keys)
+    cmds:
+      - scripts/vault-unseal.sh
+
+  vault-status:
+    desc: Show Vault seal status and cluster members
+    cmds:
+      - kubectl exec -n vault vault-0 -- vault status 2>/dev/null || echo "Could not reach Vault. Check:\ kubectl get pods -n vault"

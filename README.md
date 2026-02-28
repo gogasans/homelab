@@ -53,20 +53,23 @@ entirely via GitOps with FluxCD.
 
 ## Prerequisites
 
-First, install [mise](https://mise.jdx.dev) and [pipx](https://pipx.pypa.io) if you don't have them:
+First, install [mise](https://mise.jdx.dev) if you don't have it:
 
 ```bash
-brew install mise pipx
+brew install mise
 echo 'eval "$(mise activate zsh)"' >> ~/.zshrc
 source ~/.zshrc
 ```
 
-Then install all tools at pinned versions and verify:
+Then install all tools at pinned versions (including [Task](https://taskfile.dev), the project's task runner) and verify:
 
 ```bash
-make setup    # installs mise tools + pipx packages
-make prereqs  # verifies everything is installed correctly
+mise install      # installs all tools from .tool-versions, including task
+task setup        # installs uv-managed tools (ansible-lint)
+task prereqs      # verifies everything is installed correctly
 ```
+
+Run `task --list` to see all available tasks.
 
 ## Getting started
 
@@ -79,24 +82,24 @@ proceeding. Read the full setup guides before running anything.
 2. **Provision VMs**
    ```bash
    export PROXMOX_VE_API_TOKEN="your-token-id=your-secret-token"
-   make tofu-plan   # review what will be created
-   make tofu-apply  # create the VMs
+   task tofu-plan   # review what will be created
+   task tofu-apply  # create the VMs
    ```
 
 3. **Install k3s**
    ```bash
-   make ansible-run
+   task ansible-run
    ```
 
 4. **Bootstrap FluxCD**
    ```bash
    export GITHUB_TOKEN="your-github-personal-access-token"
-   make flux-bootstrap
+   task flux-bootstrap
    ```
 
 5. **Initialize Vault** (one-time manual step — output goes to your password manager)
    ```bash
-   make vault-unseal   # after Vault pod starts sealed
+   task vault-unseal   # after Vault pod starts sealed
    ```
    Follow [docs/runbooks/vault-init.md](docs/runbooks/vault-init.md) for the full sequence.
 
@@ -106,11 +109,11 @@ to this repository. Secrets are written directly to Vault via the CLI — never 
 ## Day-to-day operations
 
 ```bash
-make flux-status       # show status of all Flux resources
-make flux-reconcile    # force reconcile (useful after a manual push)
-make vault-status      # check whether Vault is sealed
-make vault-unseal      # unseal Vault after a pod restart
-make lint              # run all linters locally before opening a PR
+task flux-status       # show status of all Flux resources
+task flux-reconcile    # force reconcile (useful after a manual push)
+task vault-status      # check whether Vault is sealed
+task vault-unseal      # unseal Vault after a pod restart
+task lint              # run all linters locally before opening a PR
 ```
 
 ## Repository conventions
