@@ -79,15 +79,38 @@ while IFS=' ' read -r tool version; do
     gitleaks)
       check_tool "gitleaks" "$version" "gitleaks version" '[0-9]+\.[0-9]+\.[0-9]+'
       ;;
+    uv)
+      check_tool "uv" "$version" "uv --version" '[0-9]+\.[0-9]+\.[0-9]+'
+      ;;
     *)
       echo -e "${YELLOW}? $tool: no check configured for this tool${NC}"
       ;;
   esac
 done < "$TOOL_VERSIONS_FILE"
 
+# Check uv-managed tools (not in .tool-versions)
+echo ""
+echo "Checking uv-managed tools (requirements.txt)"
+echo "---------------------------------------------------"
+
+REQUIREMENTS_FILE="$ROOT_DIR/requirements.txt"
+if [ -f "$REQUIREMENTS_FILE" ]; then
+  while IFS='==' read -r pkg expected_version; do
+    [[ -z "$pkg" || "$pkg" == \#* ]] && continue
+    case "$pkg" in
+      ansible-lint)
+        check_tool "ansible-lint" "$expected_version" "ansible-lint --version" '[0-9]+\.[0-9]+\.[0-9]+'
+        ;;
+    esac
+  done < "$REQUIREMENTS_FILE"
+fi
+
 echo "---------------------------------------------------"
 if [ $FAILED -eq 1 ]; then
-  echo -e "${RED}Some required tools are missing. Install them with: mise install${NC}"
+  echo -e "${RED}Some required tools are missing.${NC}"
+  echo -e "  mise-managed tools: ${YELLOW}mise install${NC}"
+  echo -e "  uv-managed tools:   ${YELLOW}uv tool install ansible-lint==25.1.3 --with ansible==11.2.0 --python 3.12${NC}"
+  echo -e "  or run both at once: ${YELLOW}make setup${NC}"
   exit 1
 else
   echo -e "${GREEN}All required tools are installed.${NC}"

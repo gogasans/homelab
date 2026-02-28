@@ -1,6 +1,6 @@
 # Tool version pins for this project.
-# Use asdf (https://asdf-vm.com) to install and manage these.
-# Run: asdf install  (installs all tools at the pinned versions)
+# Managed by mise (https://mise.jdx.dev).
+# Run: mise install  (installs all tools at the pinned versions)
 
 opentofu 1.9.0
 kubectl 1.32.2
@@ -11,3 +11,4 @@ helm 3.17.1
 kubeconform 0.6.7
 kube-linter 0.7.2
 gitleaks 8.24.0
+uv 0.9.18

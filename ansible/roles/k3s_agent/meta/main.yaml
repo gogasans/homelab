@@ -1,0 +1,13 @@
+---
+galaxy_info:
+  role_name: k3s_agent
+  author: homelab
+  license: MIT
+  description: >
+    Joins a node to an existing k3s cluster as a worker agent. Retrieves the join token
+    dynamically from the control plane at runtime using ansible.builtin.slurp — the token
+    is never stored in git or inventory.
+  min_ansible_version: "2.15"
+
+dependencies:
+  - role: common

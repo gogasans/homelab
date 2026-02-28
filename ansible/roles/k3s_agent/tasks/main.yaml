@@ -1,0 +1,61 @@
+---
+# The join token is read at runtime from the control plane node.
+# It is never stored in git, inventory, or group_vars.
+- name: Retrieve k3s join token from control plane
+  ansible.builtin.slurp:
+    src: /var/lib/rancher/k3s/server/node-token
+  register: k3s_node_token_raw
+  delegate_to: "{{ groups['control_plane'][0] }}"
+  become: true
+
+- name: Decode join token
+  ansible.builtin.set_fact:
+    k3s_node_token: "{{ k3s_node_token_raw.content | b64decode | trim }}"
+
+- name: Retrieve control plane IP
+  ansible.builtin.set_fact:
+    k3s_server_url: "https://{{ hostvars[groups['control_plane'][0]]['ansible_host'] }}:6443"
+
+- name: Check if k3s is already installed at the correct version
+  ansible.builtin.command:
+    cmd: k3s --version
+  register: k3s_installed_version
+  changed_when: false
+  failed_when: false
+
+- name: Install k3s agent
+  ansible.builtin.shell:
+    cmd: |
+      set -o pipefail
+      curl -fsL {{ k3s_agent_install_script_url }} | \
+        INSTALL_K3S_VERSION={{ k3s_version }} \
+        INSTALL_K3S_EXEC="agent" \
+        K3S_URL={{ k3s_server_url }} \
+        K3S_TOKEN={{ k3s_node_token }} \
+        sh -
+  args:
+    executable: /bin/bash
+  changed_when: true
+  when: >
+    k3s_installed_version.rc != 0 or
+    k3s_version not in k3s_installed_version.stdout
+  notify: Restart k3s-agent
+
+- name: Enable and start k3s-agent service
+  ansible.builtin.systemd:
+    name: k3s-agent
+    state: started
+    enabled: true
+    daemon_reload: true
+
+- name: Wait for worker node to appear in cluster
+  ansible.builtin.command:
+    cmd: kubectl get node {{ inventory_hostname }} --no-headers
+  register: worker_node_status
+  until: "'Ready' in worker_node_status.stdout"
+  retries: 20
+  delay: 10
+  changed_when: false
+  delegate_to: "{{ groups['control_plane'][0] }}"
+  environment:
+    KUBECONFIG: /etc/rancher/k3s/k3s.yaml

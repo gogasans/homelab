@@ -1,0 +1,6 @@
+---
+# k3s_version is intentionally set in group_vars/all.yaml, not here.
+# Role-private path defaults — prefixed per ansible-lint var-naming rules.
+k3s_server_config_dir: /etc/rancher/k3s
+k3s_server_data_dir: /var/lib/rancher/k3s
+k3s_server_install_script_url: https://get.k3s.io
