@@ -3,6 +3,9 @@ version: '3'
 
 dotenv: ['.env']
 
+env:
+  KUBECONFIG: '{{.TASKFILE_DIR}}/.kube/config'
+
 vars:
   HOMELAB_ENV: environments/homelab
   TOFU_DIR: tofu/{{.HOMELAB_ENV}}
