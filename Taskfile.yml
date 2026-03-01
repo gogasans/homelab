@@ -1,6 +1,8 @@
 # https://taskfile.dev
 version: '3'
 
+dotenv: ['.env']
+
 vars:
   HOMELAB_ENV: environments/homelab
   TOFU_DIR: tofu/{{.HOMELAB_ENV}}
