@@ -1,0 +1,12 @@
+misconfigurations:
+  # gotk-components.yaml is generated and managed by `flux bootstrap`.
+  # Flux controllers require broad cluster-wide RBAC to reconcile arbitrary
+  # Kubernetes resources on behalf of users. These permissions are intentional
+  # and documented upstream: https://fluxcd.io/flux/security/
+  # Risk accepted: Flux maintainers. Expiry: review on next major Flux upgrade.
+  - id: KSV046
+    paths:
+      - kubernetes/clusters/homelab/flux-system/gotk-components.yaml
+  - id: KSV041
+    paths:
+      - kubernetes/clusters/homelab/flux-system/gotk-components.yaml
