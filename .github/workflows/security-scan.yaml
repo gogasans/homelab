@@ -41,6 +41,9 @@ jobs:
           scanners: secret,misconfig
           severity: HIGH,CRITICAL
           exit-code: 1
+          # gotk-components.yaml is Flux-managed vendor content; its broad RBAC
+          # (KSV046, KSV041) is required upstream. https://fluxcd.io/flux/security/
+          skip-files: kubernetes/clusters/homelab/flux-system/gotk-components.yaml
           format: sarif
           output: trivy-results.sarif
 
