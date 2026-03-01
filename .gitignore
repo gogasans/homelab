@@ -1,3 +1,6 @@
+# Local environment variables — never commit
+.env
+
 # Secrets — never commit these
 vault-keys.json        # vault operator init output — store in password manager immediately
 *.pem

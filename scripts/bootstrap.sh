@@ -7,7 +7,8 @@
 #
 # Prerequisites:
 #   - GITHUB_TOKEN env var with repo read/write permissions
-#   - KUBECONFIG env var pointing to the k3s cluster kubeconfig
+#   - GITHUB_OWNER env var set to your GitHub username
+#   - kubeconfig placed at <repo-root>/.kube/config (or KUBECONFIG set to override)
 #   - flux CLI installed (version from .tool-versions)
 
 set -euo pipefail
@@ -36,8 +37,26 @@ if [ -z "${GITHUB_OWNER:-}" ]; then
   MISSING=1
 fi
 
-if [ -z "${KUBECONFIG:-}" ] && [ ! -f "$HOME/.kube/config" ]; then
-  echo "Error: No kubeconfig found. Set KUBECONFIG or place config at ~/.kube/config."
+KUBECONFIG="${KUBECONFIG:-$ROOT_DIR/.kube/config}"
+export KUBECONFIG
+
+if [ ! -f "$KUBECONFIG" ]; then
+  # Try to get the CP IP from tofu output to make the instructions actionable
+  CP_IP=""
+  if command -v tofu &>/dev/null; then
+    CP_IP=$(tofu -chdir="$ROOT_DIR/tofu/environments/homelab" output -raw control_plane_ip 2>/dev/null || true)
+  fi
+
+  echo "Error: kubeconfig not found at $KUBECONFIG"
+  echo "  Copy your homelab kubeconfig there:"
+  if [ -n "$CP_IP" ]; then
+    echo "  scp ubuntu@${CP_IP}:/home/ubuntu/.kube/config $ROOT_DIR/.kube/config"
+    echo "  Then update the server address:"
+    echo "  sed -i '' 's|https://127.0.0.1:6443|https://${CP_IP}:6443|' $ROOT_DIR/.kube/config"
+  else
+    echo "  scp or manually copy k3s kubeconfig file to <repo-root>/.kube/config and then update the server address to the node IP"
+    echo "  (Tip: run 'tofu -chdir=tofu/environments/homelab output control_plane_ip' to get the IP)"
+  fi
   MISSING=1
 fi
 
