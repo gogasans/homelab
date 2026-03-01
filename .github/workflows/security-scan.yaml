@@ -38,7 +38,7 @@ jobs:
         with:
           scan-type: fs
           scan-ref: .
-          scanners: secret,config
+          scanners: secret,misconfig
           severity: HIGH,CRITICAL
           exit-code: 1
           format: sarif
