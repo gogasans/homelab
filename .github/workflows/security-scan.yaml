@@ -41,7 +41,6 @@ jobs:
           scanners: secret,misconfig
           severity: HIGH,CRITICAL
           exit-code: 1
-          trivyignores: .trivyignore.yaml
           format: sarif
           output: trivy-results.sarif
 

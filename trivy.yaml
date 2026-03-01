@@ -1,0 +1,10 @@
+# Trivy configuration
+# https://trivy.dev/latest/docs/references/configuration/config-file/
+
+fs:
+  skip-files:
+    # gotk-components.yaml is generated and managed by `flux bootstrap`.
+    # Flux controllers require broad cluster-wide RBAC to reconcile arbitrary
+    # Kubernetes resources. These permissions are intentional and upstream-owned.
+    # https://fluxcd.io/flux/security/
+    - "kubernetes/clusters/homelab/flux-system/gotk-components.yaml"
