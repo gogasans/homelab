@@ -103,21 +103,24 @@ vault read auth/kubernetes/role/external-secrets
 
 ## Step 4: Populate secrets needed by Phase 4
 
-Before deploying cert-manager (Phase 4), put the Cloudflare API token into Vault:
+Before deploying cert-manager (Phase 4), put the Cloudflare API token into Vault.
 
+Add your Cloudflare API token to `.env`:
+```
+VAULT_ROOT_TOKEN=<root-token-from-init-output>
+CLOUDFLARE_API_TOKEN=<your-cloudflare-api-token>
+```
+
+Then run:
 ```bash
-# Export the root token temporarily
-export VAULT_ADDR="http://127.0.0.1:8200"
-export VAULT_TOKEN="<root-token-from-init-output>"
+task vault-seed-secrets
+```
 
-# Port-forward Vault
-kubectl port-forward -n vault svc/vault 8200:8200 &
+The task handles port-forwarding, authentication, and cleanup automatically.
 
-# Put the Cloudflare API token
-vault kv put secret/cert-manager cloudflare_api_token="<your-cloudflare-api-token>"
-
-# Verify
-vault kv get secret/cert-manager
+Verify the write succeeded:
+```bash
+task vault-exec -- kv get secret/cert-manager
 ```
 
 **Document this path:** `secret/cert-manager.cloudflare_api_token` is used by
@@ -125,7 +128,32 @@ the `ExternalSecret` at `kubernetes/infrastructure/configs/cert-manager/cloudfla
 
 ---
 
-## Step 5: Verify External Secrets Operator can reach Vault
+## Step 5: Create the cluster-vars ConfigMap
+
+The `infra-configs` Flux Kustomization uses post-build variable substitution to inject
+`${ACME_EMAIL}` and `${DOMAIN}` into cert-manager ClusterIssuers at reconcile time.
+These values are not committed to git — they live only in the cluster as a ConfigMap.
+
+Add your values to `.env`:
+```
+ACME_EMAIL=you@example.com
+DOMAIN=yourdomain.com
+```
+
+Then run:
+```bash
+task configure-cluster-vars
+```
+
+This creates (or updates) the `cluster-vars` ConfigMap in `flux-system`. Flux will pick
+it up within 10 minutes (or sooner if reconciliation is triggered by a push).
+
+**This step is required before `infra-configs` can reconcile.** Without it, Flux will
+fail with: `post build failed: substitute from 'ConfigMap/cluster-vars' error: configmaps "cluster-vars" not found`.
+
+---
+
+## Step 6: Verify External Secrets Operator can reach Vault
 
 After ESO is deployed (Phase 3d), verify the `ClusterSecretStore` is healthy:
 
@@ -158,8 +186,9 @@ All Vault paths used by this cluster are documented here for disaster recovery p
 
 ## After this runbook
 
-Vault is now initialized, unsealed, and configured. Continue with Phase 3d (deploy ESO)
-and then Phase 4 (core infrastructure controllers).
+Vault is now initialized, unsealed, and configured. The cluster-vars ConfigMap is in place.
+Flux will reconcile `infra-configs` and apply the ClusterSecretStore, ExternalSecret, and
+ClusterIssuers. Continue with Phase 4 (Traefik + wildcard TLS).
 
 **Reminder:** Vault seals itself on every pod restart. See `docs/runbooks/vault-unseal.md`
 for the day-to-day unseal procedure.
