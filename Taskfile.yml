@@ -116,6 +116,11 @@ tasks:
 
   # ── Vault ──────────────────────────────────────────────────────────────────
 
+  vault-init:
+    desc: One-time Vault initialization — run ONCE after Vault is first deployed (interactive)
+    cmds:
+      - scripts/vault-init.sh
+
   vault-unseal:
     desc: Unseal Vault after a pod restart (interactive — prompts for unseal keys)
     cmds:
