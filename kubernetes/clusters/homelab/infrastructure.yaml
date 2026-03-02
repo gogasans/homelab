@@ -18,13 +18,13 @@ metadata:
   namespace: flux-system
 spec:
   interval: 10m
-  retryInterval: 1m
-  timeout: 5m
   path: ./kubernetes/infrastructure/controllers/vault
   prune: true
+  retryInterval: 1m
   sourceRef:
     kind: GitRepository
     name: flux-system
+  timeout: 5m
 ---
 apiVersion: kustomize.toolkit.fluxcd.io/v1
 kind: Kustomization
@@ -32,16 +32,16 @@ metadata:
   name: infra-controllers-external-secrets
   namespace: flux-system
 spec:
+  dependsOn:
+    - name: infra-controllers-vault
   interval: 10m
-  retryInterval: 1m
-  timeout: 5m
   path: ./kubernetes/infrastructure/controllers/external-secrets
   prune: true
+  retryInterval: 1m
   sourceRef:
     kind: GitRepository
     name: flux-system
-  dependsOn:
-    - name: infra-controllers-vault
+  timeout: 5m
 ---
 apiVersion: kustomize.toolkit.fluxcd.io/v1
 kind: Kustomization
@@ -49,16 +49,16 @@ metadata:
   name: infra-controllers-cert-manager
   namespace: flux-system
 spec:
+  dependsOn:
+    - name: infra-controllers-external-secrets
   interval: 10m
-  retryInterval: 1m
-  timeout: 5m
   path: ./kubernetes/infrastructure/controllers/cert-manager
   prune: true
+  retryInterval: 1m
   sourceRef:
     kind: GitRepository
     name: flux-system
-  dependsOn:
-    - name: infra-controllers-external-secrets
+  timeout: 5m
 ---
 # infra-configs depends on both cert-manager (for CRDs: ClusterIssuer, Certificate)
 # and external-secrets (for ExternalSecret CRDs and ESO being running to sync secrets).
@@ -68,14 +68,14 @@ metadata:
   name: infra-configs
   namespace: flux-system
 spec:
-  interval: 10m
-  retryInterval: 1m
-  timeout: 5m
-  path: ./kubernetes/infrastructure/configs
-  prune: true
-  sourceRef:
-    kind: GitRepository
-    name: flux-system
   dependsOn:
     - name: infra-controllers-cert-manager
     - name: infra-controllers-external-secrets
+  interval: 10m
+  path: ./kubernetes/infrastructure/configs
+  prune: true
+  retryInterval: 1m
+  sourceRef:
+    kind: GitRepository
+    name: flux-system
+  timeout: 5m
