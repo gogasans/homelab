@@ -31,12 +31,21 @@ server:
       cpu: 500m
 
   # Readiness and liveness probes
+  #
+  # readinessProbe: strict — pod is only Ready when Vault is initialized AND unsealed.
+  #   501 (uninitialized) and 503 (sealed) both cause Kubernetes to withhold traffic,
+  #   which is the correct behaviour for a Vault pod that needs manual unsealing.
+  #
+  # livenessProbe: permissive — Kubernetes must not kill the pod while it is waiting
+  #   to be initialized or unsealed. uninitcode=200 remaps 501→200; sealedcode=200
+  #   remaps 503→200. Without this, the liveness probe kills the pod after
+  #   initialDelaySeconds before vault-init can run, causing CrashLoopBackOff.
   readinessProbe:
     enabled: true
     path: /v1/sys/health?standbyok=true
   livenessProbe:
     enabled: true
-    path: /v1/sys/health?standbyok=true
+    path: /v1/sys/health?standbyok=true&uninitcode=200&sealedcode=200
     initialDelaySeconds: 60
 
   # Raft integrated storage backend
