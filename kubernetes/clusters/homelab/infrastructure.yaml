@@ -1,0 +1,81 @@
+# Flux Kustomization chain for all infrastructure components.
+#
+# Reconciliation order (dependsOn):
+#   infra-controllers-vault
+#     → infra-controllers-external-secrets
+#         → infra-controllers-cert-manager
+#             → infra-configs
+#
+# IMPORTANT: Vault starts sealed after every pod restart. The HelmRelease
+# will reconcile (Helm install succeeds), but the ClusterSecretStore and
+# any ExternalSecret resources will not function until Vault is manually
+# unsealed. See docs/runbooks/vault-unseal.md.
+---
+apiVersion: kustomize.toolkit.fluxcd.io/v1
+kind: Kustomization
+metadata:
+  name: infra-controllers-vault
+  namespace: flux-system
+spec:
+  interval: 10m
+  retryInterval: 1m
+  timeout: 5m
+  path: ./kubernetes/infrastructure/controllers/vault
+  prune: true
+  sourceRef:
+    kind: GitRepository
+    name: flux-system
+---
+apiVersion: kustomize.toolkit.fluxcd.io/v1
+kind: Kustomization
+metadata:
+  name: infra-controllers-external-secrets
+  namespace: flux-system
+spec:
+  interval: 10m
+  retryInterval: 1m
+  timeout: 5m
+  path: ./kubernetes/infrastructure/controllers/external-secrets
+  prune: true
+  sourceRef:
+    kind: GitRepository
+    name: flux-system
+  dependsOn:
+    - name: infra-controllers-vault
+---
+apiVersion: kustomize.toolkit.fluxcd.io/v1
+kind: Kustomization
+metadata:
+  name: infra-controllers-cert-manager
+  namespace: flux-system
+spec:
+  interval: 10m
+  retryInterval: 1m
+  timeout: 5m
+  path: ./kubernetes/infrastructure/controllers/cert-manager
+  prune: true
+  sourceRef:
+    kind: GitRepository
+    name: flux-system
+  dependsOn:
+    - name: infra-controllers-external-secrets
+---
+# infra-configs depends on both cert-manager (for CRDs: ClusterIssuer, Certificate)
+# and external-secrets (for ExternalSecret CRDs and ESO being running to sync secrets).
+apiVersion: kustomize.toolkit.fluxcd.io/v1
+kind: Kustomization
+metadata:
+  name: infra-configs
+  namespace: flux-system
+spec:
+  interval: 10m
+  retryInterval: 1m
+  timeout: 5m
+  path: ./kubernetes/infrastructure/configs
+  prune: true
+  sourceRef:
+    kind: GitRepository
+    name: flux-system
+  dependsOn:
+    - name: infra-controllers-cert-manager
+    - name: infra-controllers-external-secrets
