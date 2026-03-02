@@ -2,5 +2,6 @@ apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 resources:
   - vault/cluster-secret-store.yaml
-  # cert-manager ClusterIssuers and ExternalSecret (added in Phase 4 step 2)
+  - cert-manager/cloudflare-token-external-secret.yaml
+  - cert-manager/cluster-issuers.yaml
   # traefik middlewares (added in Phase 4 step 4)
