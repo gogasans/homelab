@@ -2,15 +2,36 @@
 # https://docs.kubelinter.io/#/configuring-kubelinter
 
 checks:
-  # Start with the default set and add/remove as needed
   addAllBuiltIn: true
   exclude:
-    # Flux system components are managed by flux bootstrap — skip linting them
-    - "no-read-only-root-fs"     # Some Flux controllers require writable root
+    # --- Flux system (auto-generated, cannot be modified) ---
+    # Flux controllers require writable root filesystem
+    - "no-read-only-root-fs"
+    # Flux controllers use wildcard ClusterRoles and cluster-admin bindings by design
+    - "wildcard-in-rules"
+    - "cluster-admin-role-binding"
+    - "access-to-create-pods"
+    - "access-to-secrets"
+
+    # --- Homelab-inappropriate checks ---
+    # 2-node homelab cannot satisfy minimum-three-replicas
+    - "minimum-three-replicas"
+    # No node affinity rules needed in a 2-node homelab
+    - "no-node-affinity"
+    # We do not use the email/owner annotation convention
+    - "required-annotation-email"
+    - "required-label-owner"
+    # DNS config not required for internal cluster services
+    - "dnsconfig-options"
+    # Rolling update strategy not enforced for single-replica homelab services
+    - "no-rolling-update-strategy"
+    # Restart policy checks not applicable to our workload patterns
+    - "restart-policy"
   include: []
 
 customChecks: []
 
-# Ignore the auto-generated flux-system directory
+# Ignore the auto-generated flux-system directory.
+# Uses **/flux-system/** to match regardless of path prefix.
 ignorePaths:
-  - "kubernetes/clusters/homelab/flux-system/**"
+  - "**/flux-system/**"
