@@ -1,0 +1,46 @@
+# ClusterIssuers — Let's Encrypt ACME via Cloudflare DNS-01
+#
+# Two issuers are defined:
+#   letsencrypt-staging   — use first to validate DNS-01 works (no rate limits)
+#   letsencrypt-production — switch to this once staging issues a valid cert
+#
+# ${ACME_EMAIL} and ${DOMAIN} are substituted at reconcile time by Flux
+# post-build variable substitution from the cluster-vars ConfigMap.
+# See: task configure-cluster-vars
+#
+# The cloudflare-api-token Secret is created by cloudflare-token-external-secret.yaml.
+
+---
+apiVersion: cert-manager.io/v1
+kind: ClusterIssuer
+metadata:
+  name: letsencrypt-staging
+spec:
+  acme:
+    email: ${ACME_EMAIL}
+    privateKeySecretRef:
+      name: letsencrypt-staging-key
+    server: https://acme-staging-v02.api.letsencrypt.org/directory
+    solvers:
+      - dns01:
+          cloudflare:
+            apiTokenSecretRef:
+              key: api-token
+              name: cloudflare-api-token
+---
+apiVersion: cert-manager.io/v1
+kind: ClusterIssuer
+metadata:
+  name: letsencrypt-production
+spec:
+  acme:
+    email: ${ACME_EMAIL}
+    privateKeySecretRef:
+      name: letsencrypt-production-key
+    server: https://acme.api.letsencrypt.org/directory
+    solvers:
+      - dns01:
+          cloudflare:
+            apiTokenSecretRef:
+              key: api-token
+              name: cloudflare-api-token

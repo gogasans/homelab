@@ -126,6 +126,66 @@ tasks:
     cmds:
       - scripts/vault-unseal.sh
 
+  configure-cluster-vars:
+    desc: Create the cluster-vars ConfigMap in flux-system from .env (idempotent)
+    summary: |
+      Creates a ConfigMap named cluster-vars in the flux-system namespace.
+      Flux reads this ConfigMap at reconcile time to substitute ${ACME_EMAIL}
+      and ${DOMAIN} placeholders in infra-configs manifests.
+
+      This ConfigMap is NOT stored in git — it lives only in the cluster.
+      Re-run this task whenever you change ACME_EMAIL or DOMAIN in .env.
+
+      Requires ACME_EMAIL and DOMAIN in .env.
+    cmds:
+      - |
+        kubectl create configmap cluster-vars \
+          --namespace=flux-system \
+          --from-literal=ACME_EMAIL="{{.ACME_EMAIL}}" \
+          --from-literal=DOMAIN="{{.DOMAIN}}" \
+          --dry-run=client -o yaml | kubectl apply -f -
+
+  vault-seed-secrets:
+    desc: Write all secrets from .env into Vault (idempotent — safe to re-run)
+    summary: |
+      Reads secret values from .env and writes them to Vault using kv put.
+      Requires VAULT_ROOT_TOKEN and any secret vars (e.g. CLOUDFLARE_API_TOKEN) in .env.
+      Safe to re-run — kv put overwrites existing values.
+    env:
+      VAULT_ADDR: http://127.0.0.1:8200
+      VAULT_TOKEN: "{{.VAULT_ROOT_TOKEN}}"
+    cmds:
+      - |
+        kubectl port-forward -n vault svc/vault 8200:8200 &
+        PF_PID=$!
+        sleep 2
+        vault kv put secret/cert-manager cloudflare_api_token="{{.CLOUDFLARE_API_TOKEN}}"
+        echo "  OK: secret/cert-manager written"
+        kill $PF_PID 2>/dev/null || true
+
+  vault-exec:
+    desc: Run a vault CLI command against the homelab Vault (requires VAULT_ROOT_TOKEN in .env)
+    summary: |
+      Starts a port-forward to Vault, runs the given vault command, then tears down
+      the port-forward. VAULT_ADDR and VAULT_TOKEN are set automatically from .env.
+
+      Examples:
+        task vault-exec -- kv put secret/cert-manager cloudflare_api_token=abc123
+        task vault-exec -- kv get secret/cert-manager
+        task vault-exec -- auth list
+
+      Requires VAULT_ROOT_TOKEN=<root-token> in .env (copy from 1Password after vault-init).
+    env:
+      VAULT_ADDR: http://127.0.0.1:8200
+      VAULT_TOKEN: "{{.VAULT_ROOT_TOKEN}}"
+    cmds:
+      - |
+        kubectl port-forward -n vault svc/vault 8200:8200 &
+        PF_PID=$!
+        sleep 2
+        vault {{.CLI_ARGS}}
+        kill $PF_PID 2>/dev/null || true
+
   vault-status:
     desc: Show Vault seal status and cluster members
     cmds:

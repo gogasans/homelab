@@ -62,6 +62,10 @@ spec:
 ---
 # infra-configs depends on both cert-manager (for CRDs: ClusterIssuer, Certificate)
 # and external-secrets (for ExternalSecret CRDs and ESO being running to sync secrets).
+#
+# postBuild substitutes ${ACME_EMAIL} and ${DOMAIN} at reconcile time from the
+# cluster-vars ConfigMap. That ConfigMap is NOT in git — create it with:
+#   task configure-cluster-vars
 apiVersion: kustomize.toolkit.fluxcd.io/v1
 kind: Kustomization
 metadata:
@@ -73,6 +77,10 @@ spec:
     - name: infra-controllers-external-secrets
   interval: 10m
   path: ./kubernetes/infrastructure/configs
+  postBuild:
+    substituteFrom:
+      - kind: ConfigMap
+        name: cluster-vars
   prune: true
   retryInterval: 1m
   sourceRef:
